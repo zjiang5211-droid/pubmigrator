@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batch Verification Report — PubMigrator</title>
+<meta name="description" content="Per-file verification report for your .pub batch conversion: which files passed, which need a human look, and which failed.">
+<meta name="robots" content="noindex">
+<style>
+:root{--bg:#f7f5f0;--ink:#1d1a16;--muted:#6b6459;--accent:#b3341f;--accent-d:#8f2817;--card:#ffffff;--line:#e6e0d4;--ok:#1e7e34;--warn:#b26a00;--bad:#b3341f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding:0 18px}
+header.top{padding:26px 0 6px;display:flex;align-items:center;gap:12px}
+.logo{font-weight:800;font-size:22px;letter-spacing:-.5px;text-decoration:none;color:var(--ink)}
+.logo span{color:var(--accent)}
+h1{font-size:clamp(24px,4vw,34px);letter-spacing:-.5px;margin:18px 0 6px}
+.sub{color:var(--muted);margin:0 0 18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:18px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.card .n{font-size:28px;font-weight:800}
+.card .l{font-size:13px;color:var(--muted)}
+.card.c-ok .n{color:var(--ok)}.card.c-warn .n{color:var(--warn)}.card.c-bad .n{color:var(--bad)}
+.progress{margin:26px 0;text-align:center;color:var(--muted)}
+.bar{height:10px;background:#e9e2d3;border-radius:6px;overflow:hidden;margin:12px 0}
+.bar>div{height:100%;background:var(--accent);width:0;transition:width .3s}
+table.files{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);border-radius:12px;overflow:hidden}
+table.files td,table.files th{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+table.files th{background:#faf7f1;font-size:13px;color:var(--muted)}
+table.files a{color:var(--accent);font-weight:600}
+.qbadge{display:inline-block;font-weight:700;font-size:13px;padding:3px 11px;border-radius:20px;white-space:nowrap}
+.q-passed{background:#e6f4ea;color:var(--ok)}.q-suspicious{background:#fef3e2;color:var(--warn)}.q-failed{background:#fdecea;color:var(--bad)}.q-locked{background:#eee;color:var(--muted)}
+.reasons{font-size:13px;color:var(--muted);margin:6px 0 0;padding-left:0;list-style:none}
+.reasons li{margin:4px 0;padding-left:18px;position:relative}
+.reasons li.warn::before{content:"⚠️";position:absolute;left:0}
+.reasons li.fail::before{content:"❌";position:absolute;left:0}
+.reasons li.info::before{content:"ℹ️";position:absolute;left:0}
+.thumb{margin-top:8px;border:1px solid var(--line);border-radius:8px;max-width:220px;display:block}
+.lockbox{background:#fff8f3;border:1px solid #f0d9c8;border-radius:12px;padding:22px;margin:20px 0;text-align:center}
+.price-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.price-card{border:1px solid var(--line);border-radius:12px;padding:16px 20px;min-width:220px;background:#fff}
+.price-card .p{font-size:26px;font-weight:800}
+.price-card .d{font-size:14px;color:var(--muted);margin:6px 0 12px}
+.price-card a.btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:700;padding:10px 22px;border-radius:10px}
+.price-card a.btn.soon{background:#c9c1b1;pointer-events:none}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+button.ghost,button.primary{font-size:15px;padding:10px 18px;border-radius:10px;cursor:pointer}
+button.primary{background:var(--accent);color:#fff;border:none;font-weight:700}
+button.ghost{background:#fff;border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:wait}
+footer{border-top:1px solid var(--line);margin-top:30px;padding:22px 0 40px;font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><a class="logo" href="/">Pub<span>Migrator</span></a></header>
+<h1>🔍 Batch Verification Report</h1>
+<p class="sub" id="subline">Checking every file — not just converting it.</p>
+
+<div class="progress" id="progressBox">
+  <div>Verifying your files… <span id="progText"></span></div>
+  <div class="bar"><div id="progBar"></div></div>
+</div>
+
+<div id="reportBody" style="display:none">
+  <div class="cards" id="cards"></div>
+  <div class="toolbar" id="toolbar" style="display:none">
+    <button class="primary" id="csvBtn">⬇ Download failure list (CSV)</button>
+    <button class="ghost" id="retryBtn">↻ Retry failed files</button>
+  </div>
+  <table class="files"><thead><tr>
+    <th>File</th><th>Verdict</th><th>Pages</th><th>Words</th><th>Images</th><th>Download</th>
+  </tr></thead><tbody id="rows"></tbody></table>
+  <div id="lockbox"></div>
+</div>
+
+<footer><p>PubMigrator — the converter that tells you which files it broke. Files are deleted from our servers 24h after upload.<br>Contact: {{ contact_email }}</p></footer>
+</div>
+
+<script>
+(function(){
+  var JOB="{{ job_id }}";
+  var PAYMENTS_READY={{ 'true' if payments_ready else 'false' }};
+  var ONETIME="{{ onetime_url }}", SUB="{{ sub_url }}";
+  var report=null, timer=null;
+
+  function badge(v,label){
+    var cls=v==='passed'?'q-passed':(v==='suspicious'?'q-suspicious':(v==='failed'?'q-failed':'q-locked'));
+    var icon=v==='passed'?'✅':(v==='suspicious'?'⚠️':(v==='failed'?'❌':'🔒'));
+    return '<span class="qbadge '+cls+'">'+icon+' '+(label||v)+'</span>';
+  }
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+  function render(){
+    var s=report.summary||{};
+    document.getElementById('cards').innerHTML=
+      '<div class="card"><div class="n">'+(s.total||0)+'</div><div class="l">files</div></div>'+
+      '<div class="card c-ok"><div class="n">'+(s.passed||0)+'</div><div class="l">✅ verified</div></div>'+
+      '<div class="card c-warn"><div class="n">'+(s.suspicious||0)+'</div><div class="l">⚠️ needs a look</div></div>'+
+      '<div class="card c-bad"><div class="n">'+(s.failed||0)+'</div><div class="l">❌ failed</div></div>'+
+      ((s.locked||0)?'<div class="card"><div class="n">'+s.locked+'</div><div class="l">🔒 locked</div></div>':'');
+    var html='';
+    (report.files||[]).forEach(function(f){
+      if(f.locked){html+='<tr><td>'+esc(f.name)+'</td><td>'+badge('locked','Locked')+'</td><td colspan="4" style="color:var(--muted)">Free preview covers the first files — unlock the rest below.</td></tr>';return;}
+      var dl=f.download?'<a href="'+f.download+'">PDF</a>':'—';
+      var cell=badge(f.verdict, f.badge&&f.badge.label);
+      if(report.paid && f.reasons && f.reasons.length){
+        cell+='<ul class="reasons">'+f.reasons.map(function(r){
+          return '<li class="'+r.severity+'">'+esc(r.text)+'</li>';}).join('')+'</ul>';
+        if(f.thumb_url) cell+='<img class="thumb" src="'+f.thumb_url+'" alt="First-page preview of '+esc(f.name)+'" loading="lazy">';
+      } else if(!report.paid && f.verdict!=='passed'){
+        cell+='<div style="font-size:13px;color:var(--muted)">Why? Unlock the full report below.</div>';
+      }
+      html+='<tr><td>'+esc(f.name)+'</td><td>'+cell+'</td><td>'+(f.pages||0)+'</td><td>'+(f.words||0)+'</td><td>'+(f.images||0)+'</td><td>'+dl+'</td></tr>';
+    });
+    document.getElementById('rows').innerHTML=html;
+    if(report.paid){
+      var tb=document.getElementById('toolbar');tb.style.display='flex';
+      document.getElementById('csvBtn').onclick=function(){window.location=report.csv_url;};
+      var rb=document.getElementById('retryBtn');
+      if((s.failed||0)===0){rb.disabled=true;rb.textContent='↻ No failed files to retry';}
+      else rb.onclick=function(){
+        rb.disabled=true;rb.textContent='Retrying…';
+        fetch(report.retry_url,{method:'POST'}).then(function(r){return r.json();}).then(function(j){
+          if(j.ok) poll(); else {rb.disabled=false;rb.textContent='↻ Retry failed files';}
+        });
+      };
+    } else {
+      var lockedN=s.locked||0;
+      document.getElementById('lockbox').innerHTML=
+        '<div class="lockbox"><h3 style="margin-top:0">🔓 Unlock the full verification report</h3>'+
+        '<p style="color:var(--muted);max-width:560px;margin:0 auto">See <strong>why</strong> each file failed or looks suspicious, get first-page previews of questionable files, export the failure list as CSV, and retry failed files with one click.'+
+        (lockedN?(' Plus unlock the remaining <strong>'+lockedN+'</strong> locked files.'):'')+'</p>'+
+        '<div class="price-row">'+
+        '<div class="price-card"><div class="p">$9</div><div class="d"><strong>Batch Pack</strong><br>200 files · one-time<br>full verification report</div>'+
+        '<a class="btn'+(PAYMENTS_READY?'':' soon')+'" href="'+ONETIME+'">'+(PAYMENTS_READY?'Get the $9 pack':'Coming soon')+'</a></div>'+
+        '<div class="price-card"><div class="p">$29<span style="font-size:15px">/mo</span></div><div class="d"><strong>Unlimited</strong><br>unlimited batch + API access</div>'+
+        '<a class="btn'+(PAYMENTS_READY?'':' soon')+'" href="'+SUB+'">'+(PAYMENTS_READY?'Go unlimited':'Coming soon')+'</a></div>'+
+        '</div></div>';
+    }
+    document.getElementById('progressBox').style.display='none';
+    document.getElementById('reportBody').style.display='block';
+    document.getElementById('subline').textContent=
+      'Checked '+(s.total||0)+' files: '+(s.passed||0)+' verified, '+(s.suspicious||0)+' need a look, '+(s.failed||0)+' failed.';
+  }
+
+  function poll(){
+    fetch('/api/job/'+JOB+'/report').then(function(r){return r.json();}).then(function(j){
+      report=j;
+      if(j.status==='done'||j.status==='failed'){render();if(timer)clearInterval(timer);}
+      else{
+        var p=j.progress||{done:0,total:0};
+        document.getElementById('progText').textContent=p.done+' / '+p.total+' files';
+        document.getElementById('progBar').style.width=(p.total?Math.round(100*p.done/p.total):0)+'%';
+      }
+    }).catch(function(){/* keep polling */});
+  }
+  timer=setInterval(poll,2000);poll();
+})();
+</script>
+</body>
+</html>

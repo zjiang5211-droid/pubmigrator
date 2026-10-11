@@ -1,1 +1,288 @@
-<!-- placeholder, will be replaced by upload -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batch PUB to PDF Converter with File Verification — Migrate Publisher Files (Free)</title>
+<meta name="description" content="Microsoft Publisher is gone. Batch-convert .pub files to PDF free — and get a per-file verification report showing which files converted cleanly and which need a look. No signup.">
+<link rel="canonical" href="{{ site_url }}/">
+<meta property="og:title" content="Batch PUB to PDF Converter with Verification — Free, No Signup">
+<meta property="og:description" content="Publisher is retired. Batch-convert .pub files to PDF and get a per-file verification report — the only converter that tells you which files it broke.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ site_url }}/">
+<style>
+:root{--bg:#f7f5f0;--ink:#1d1a16;--muted:#6b6459;--accent:#b3341f;--accent-d:#8f2817;--card:#ffffff;--line:#e6e0d4;--ok:#1e7e34;--warn:#b26a00;--bad:#b3341f}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+.wrap{max-width:880px;margin:0 auto;padding:0 18px}
+header.top{padding:26px 0 6px;display:flex;align-items:center;gap:12px}
+.logo{font-weight:800;font-size:22px;letter-spacing:-.5px}
+.logo span{color:var(--accent)}
+.badge-new{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
+.hero{text-align:center;padding:34px 0 10px}
+.hero h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px;letter-spacing:-1px}
+.hero p.lede{font-size:18px;color:var(--muted);max-width:640px;margin:0 auto 6px}
+.tool-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px;margin:26px 0;box-shadow:0 6px 24px rgba(0,0,0,.06)}
+.drop{border:2px dashed #c9c1b1;border-radius:12px;padding:38px 18px;text-align:center;cursor:pointer;transition:.15s;background:#fbf9f5}
+.drop:hover,.drop.over{border-color:var(--accent);background:#fdf6f3}
+.drop input{display:none}
+.drop .big{font-size:17px;font-weight:600}
+.drop .small{font-size:14px;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:16px}
+select,button{font-size:16px;padding:11px 16px;border-radius:10px;border:1px solid var(--line)}
+button.primary{background:var(--accent);color:#fff;border:none;font-weight:700;cursor:pointer;padding:12px 28px}
+button.primary:hover{background:var(--accent-d)}
+button.primary:disabled{opacity:.55;cursor:wait}
+button.ghost{background:#fff;cursor:pointer}
+.progress{display:none;margin-top:14px;font-size:14px;color:var(--muted)}
+.result{display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:18px}
+.qbadge{display:inline-block;font-weight:700;font-size:14px;padding:4px 12px;border-radius:20px;margin-bottom:8px}
+.q-ok{background:#e6f4ea;color:var(--ok)}.q-review{background:#fef3e2;color:var(--warn)}.q-failed{background:#fdecea;color:var(--bad)}.q-locked{background:#eee;color:var(--muted)}
+.qnote{font-size:14px;color:var(--muted);margin:6px 0 12px}
+table.files{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+table.files td,table.files th{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+table.files a{color:var(--accent);font-weight:600}
+.paywall-box{background:#fff8f3;border:1px solid #f0d9c8;border-radius:12px;padding:20px;margin-top:16px;text-align:center}
+.paywall-box h3{margin:0 0 8px}
+.price-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.price-card{border:1px solid var(--line);border-radius:12px;padding:16px 20px;min-width:220px;background:#fff}
+.price-card .p{font-size:26px;font-weight:800}
+.price-card .d{font-size:14px;color:var(--muted);margin:6px 0 12px}
+.price-card a.btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:700;padding:10px 22px;border-radius:10px}
+.price-card a.btn.soon{background:#c9c1b1;pointer-events:none}
+section.content{padding:26px 0}
+section.content h2{font-size:26px;letter-spacing:-.5px;margin:34px 0 10px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.step .n{font-size:22px;font-weight:800;color:var(--accent)}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+.faq summary{font-weight:700;cursor:pointer;font-size:16px}
+.timeline{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0}
+.timeline li{margin:6px 0}
+footer{border-top:1px solid var(--line);margin-top:30px;padding:22px 0 40px;font-size:14px;color:var(--muted)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;align-items:center;justify-content:center;padding:18px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:560px;width:100%;padding:28px;max-height:90vh;overflow:auto}
+.modal h2{margin-top:0}
+.close-x{float:right;border:none;background:none;font-size:22px;cursor:pointer;color:var(--muted)}
+.notice{background:#eef6ee;border:1px solid #cfe6cf;border-radius:10px;padding:12px 16px;font-size:14px;margin:14px 0}
+@media(max-width:560px){.tool-card{padding:18px 14px}.drop{padding:28px 12px}}
+</style>
+<script type="application/ld+json">
+{
+ "@context":"https://schema.org",
+ "@type":"FAQPage",
+ "mainEntity":[
+  {"@type":"Question","name":"Can I open a .pub file without Microsoft Publisher?",
+   "@type":"Answer","acceptedAnswer":{"@type":"Answer","text":"Yes. Upload your .pub file above and convert it to PDF, PNG, SVG or ODG right in your browser. No Publisher install and no signup needed."}},
+  {"@type":"Question","name":"Is the PUB to PDF converter really free?",
+   "@type":"Answer","acceptedAnswer":{"@type":"Answer","text":"Yes. Converting single files is free up to 3 per day, and each batch ZIP converts the first 5 files free. Larger batches use a one-time $9 pack or a $29/month unlimited plan."}},
+  {"@type":"Question","name":"Why can't I open my Publisher files anymore?",
+   "@type":"Answer","acceptedAnswer":{"@type":"Answer","text":"Microsoft removed Publisher from Microsoft 365 on October 1, 2026, and support for Publisher 2021 ended October 13, 2026. .pub files no longer open in current Microsoft software."}},
+  {"@type":"Question","name":"Will my newsletter layout survive conversion?",
+   "@type":"Answer","acceptedAnswer":{"@type":"Answer","text":"Text comes through intact in most files. Simple layouts convert well; complex multi-column newsletters and intricate tables may shift. Every conversion gets a verification verdict telling you whether to spot-check before deleting the original."}},
+  {"@type":"Question","name":"What happens to my files? Is it private?",
+   "@type":"Answer","acceptedAnswer":{"@type":"Answer","text":"Files are converted on our server and deleted immediately afterwards. Nothing is kept, shared, or used for any other purpose."}},
+  {"@type":"Question","name":"I have hundreds of .pub files. Can I convert them all?",
+   "@type":"Answer","acceptedAnswer":{"@type":"Answer","text":"Yes. Put them in a ZIP file and upload it in the batch section. The first 5 files of each batch are free; a $9 one-time pack covers 200 files, or $29/month gives unlimited batch conversion plus API access."}},
+  {"@type":"Question","name":"What is the best Microsoft Publisher alternative in 2026?",
+   "@type":"Answer","acceptedAnswer":{"@type":"Answer","text":"For opening old files, convert them to PDF for archiving or SVG/ODG for continued editing in free tools like LibreOffice Draw or Inkscape. For new designs, free desktop publishing tools like Scribus replace Publisher's design features."}},
+  {"@type":"Question","name":"How do I know my .pub files converted correctly?",
+   "@type":"Answer","acceptedAnswer":{"@type":"Answer","text":"A 'successful' conversion can be a 0-byte PDF or a newsletter that silently lost its pictures. This tool checks every output — parseable PDF, surviving text, surviving images — and gives each file a verdict: verified, needs a human look (with the reason), or failed."}},
+  {"@type":"Question","name":"Can I batch convert pub files to PDF and check them all at once?",
+   "@type":"Answer","acceptedAnswer":{"@type":"Answer","text":"Yes. Upload a ZIP of up to 200 .pub files; each one is converted and verified, and you get a per-file report showing which passed, which need review, and which failed."}}
+ ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="logo">Pub<span>Migrator</span></div>
+  <div class="badge-new">Publisher is retired — migrate now</div>
+</header>
+
+<div class="hero">
+  <h1>Batch Convert .pub to PDF — and See Which Files Actually Worked</h1>
+  <p class="lede">Publisher is gone from Microsoft 365. Upload your .pub files and get PDFs back — with a <strong>per-file verification report</strong> that tells you which conversions to trust. Free, no signup, works on your phone.</p>
+</div>
+
+<div class="tool-card" id="tool">
+  <label class="drop" id="drop">
+    <input type="file" id="fileInput" accept=".pub">
+    <div class="big">📄 Drop your .pub file here, or click to browse</div>
+    <div class="small">Free · up to 3 conversions a day · your file is deleted right after conversion</div>
+  </label>
+  <div class="row">
+    <select id="fmtSelect" aria-label="Output format">
+      <option value="pdf">PDF — archive copy</option>
+      <option value="png">PNG — page preview</option>
+      <option value="svg">SVG — editable vector</option>
+      <option value="odg">ODG — edit in LibreOffice Draw</option>
+    </select>
+    <button class="primary" id="convertBtn" disabled>Convert</button>
+  </div>
+  <div class="progress" id="progress">Converting… this usually takes a few seconds.</div>
+  <div class="result" id="result"></div>
+</div>
+
+<div class="tool-card" id="batch">
+  <h2 style="margin-top:0">Have dozens or hundreds of files?</h2>
+  <p style="color:var(--muted);margin-top:0">Zip them up and convert in bulk — with <strong>verification on every file</strong>. The <strong>first 5 files of every batch are free</strong>, a perfect way to test quality on your own archive before paying anything. The $9 pack adds the full verification report: why each file failed, first-page previews, CSV failure list, one-click retry.</p>
+  <label class="drop" id="dropZip">
+    <input type="file" id="zipInput" accept=".zip">
+    <div class="big">🗂️ Drop a .zip of .pub files here</div>
+    <div class="small">Up to 200 files per batch · 50&nbsp;MB per file</div>
+  </label>
+  <div class="row"><button class="primary" id="batchBtn" disabled>Convert batch</button></div>
+  <div class="row" style="margin-top:10px;font-size:14px;color:var(--muted)">
+    <label>Already have the $9 Batch Pack? <input id="unlockKey" type="text" placeholder="paste unlock key" style="font-size:14px;padding:8px 12px;border-radius:8px;border:1px solid var(--line)" autocomplete="off"></label>
+  </div>
+  <div class="progress" id="batchProgress">Converting your batch… larger archives take a minute or two.</div>
+  <div class="result" id="batchResult"></div>
+</div>
+
+<section class="content">
+  <h2>Why you need this now</h2>
+  <div class="timeline">
+    <ul>
+      <li><strong>October 1, 2026</strong> — Microsoft removed Publisher from Microsoft 365. Installed copies stopped opening .pub files.</li>
+      <li><strong>October 13, 2026</strong> — support for Publisher 2021 (the last perpetual version) ended. No more security updates.</li>
+      <li><strong>Today</strong> — schools, churches, clubs and small offices with decades of newsletters, flyers and certificates in .pub format need a way out.</li>
+    </ul>
+  </div>
+  <p>If your files won't open anymore, you're not alone — and you don't need to buy anything or install anything. Convert them here, or <a href="#batch">in bulk</a>.</p>
+
+  <h2>How it works</h2>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><strong>Upload</strong><br>Drop a .pub file (or a ZIP of many). No account, no email, no software.</div>
+    <div class="step"><div class="n">2</div><strong>Convert</strong><br>We render it with the open-source LibreOffice engine and verify the result.</div>
+    <div class="step"><div class="n">3</div><strong>Download + verify</strong><br>Get your PDF with an honest quality badge. Your upload is deleted immediately.</div>
+  </div>
+
+  <h2>Honest about quality</h2>
+  <p>Most converters silently hand you broken files. We don't. Every conversion is checked, and you get one of three verdicts:</p>
+  <div class="notice">✅ <strong>Verified — looks good</strong> — text, images and page count all check out. Still, spot-check before deleting originals.<br>
+  ⚠️ <strong>Needs a human look</strong> — converted, but something looks off (thin text, possibly lost pictures). Open it next to the original.<br>
+  ❌ <strong>Conversion failed</strong> — no usable output. The file may be corrupted or use features the converter can't read.</div>
+
+  <h2>The only converter that tells you which files it broke</h2>
+  <p>Converting one file is easy. Converting <strong>two thousand</strong> — a teacher's decade of newsletters, a church's bulletin archive — and <em>knowing which ones actually survived</em> is the hard part. Other batch converters report "success" on files that came out as 0-byte PDFs or silently dropped every picture.</p>
+  <p>Our batch pipeline verifies every single file after conversion: is the PDF real and parseable, did the text survive, did the embedded pictures make it across? You get a <strong>per-file verification report</strong> — which files passed, which need a human look and why, which failed outright. Suspicious files get a first-page preview so you can eyeball them in seconds, and the failure list exports to CSV for your migration checklist. <a href="#batch">Try it on 5 files free</a>.</p>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details><summary>Can I open a .pub file without Microsoft Publisher?</summary>
+      <p>Yes — that's exactly what this page does. Upload the .pub, download a PDF, PNG, SVG or ODG. No Publisher install, no signup.</p></details>
+    <details><summary>Is this really free? What's the catch?</summary>
+      <p>Single files: free, 3 per day. Batch ZIPs: first 5 files free. If you have hundreds of files, a <strong>$9 one-time pack</strong> covers 200 files, or <strong>$29/month</strong> gets unlimited batch conversion plus API access. No account needed for the free tier.</p></details>
+    <details><summary>Will my files stay private?</summary>
+      <p>Yes. Files are converted and then deleted immediately. We keep nothing, share nothing.</p></details>
+    <details><summary>My whole archive is .pub — hundreds of files. Now what?</summary>
+      <p>Put them in a ZIP and use the <a href="#batch">batch converter</a>. You'll get a per-file report with quality badges, so you know exactly which files need a human look before you delete the originals.</p></details>
+    <details><summary>Can I keep editing after converting?</summary>
+      <p>Choose <strong>SVG</strong> to edit the vector layout in free tools like Inkscape, or <strong>ODG</strong> to continue in LibreOffice Draw (also free). For a frozen archive copy, PDF is the right choice.</p></details>
+    <details><summary>Why not just use another online converter?</summary>
+      <p>Most convert one file at a time, require accounts, or silently produce empty files. We do bulk, verify every file with a per-file report, and delete your uploads.</p></details>
+    <details><summary>How do I know my .pub files converted correctly?</summary>
+      <p>That's the problem most converters ignore: a "successful" conversion can be a 0-byte PDF, or a newsletter that silently lost all its pictures. We check every output — parseable PDF, surviving text, surviving images — and give each file a verdict: <strong>verified</strong>, <strong>needs a human look</strong> (with the reason why), or <strong>failed</strong>. The $9 batch pack adds first-page previews of questionable files, a CSV failure list, and one-click retry.</p></details>
+    <details><summary>Can I batch convert pub files to PDF and check them all at once?</summary>
+      <p>Yes — that's the core of this tool. Upload a ZIP of up to 200 .pub files and each one is converted <em>and</em> verified. You get a report showing exactly which files passed, which need review, and which failed, instead of discovering problems months later when the originals are gone.</p></details>
+  </div>
+</section>
+
+<footer>
+  <p>PubMigrator — built for everyone stranded by the Publisher shutdown. Files are deleted immediately after conversion.<br>
+  Contact: {{ contact_email }} · <a href="#tool">Convert a file</a> · <a href="#batch">Batch convert</a></p>
+</footer>
+</div>
+
+<div class="modal-bg" id="paywallModal">
+  <div class="modal">
+    <button class="close-x" id="paywallClose" aria-label="Close">×</button>
+    <h2 id="paywallTitle">Unlock the rest of your files</h2>
+    <p id="paywallReason" style="color:var(--muted)"></p>
+    <div class="price-row">
+      <div class="price-card">
+        <div class="p">$9</div><div class="d"><strong>Batch Pack</strong><br>200 files · one-time<br>perfect for a full archive</div>
+        <a class="btn" id="onetimeBtn" href="{{ onetime_url }}">Get the $9 pack</a>
+      </div>
+      <div class="price-card">
+        <div class="p">$29<span style="font-size:15px">/mo</span></div><div class="d"><strong>Unlimited</strong><br>unlimited batch + API access<br>for schools, print shops, IT</div>
+        <a class="btn" id="subBtn" href="{{ sub_url }}">Go unlimited</a>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:14px" id="paywallNote"></p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var PAYMENTS_READY = {{ 'true' if payments_ready else 'false' }};
+  var fileInput=document.getElementById('fileInput'),drop=document.getElementById('drop'),
+      convertBtn=document.getElementById('convertBtn'),fmtSelect=document.getElementById('fmtSelect'),
+      progress=document.getElementById('progress'),result=document.getElementById('result');
+  var zipInput=document.getElementById('zipInput'),dropZip=document.getElementById('dropZip'),
+      batchBtn=document.getElementById('batchBtn'),batchProgress=document.getElementById('batchProgress'),
+      batchResult=document.getElementById('batchResult');
+
+  function pickFile(input,btn,label){input.addEventListener('change',function(){
+    if(input.files.length){btn.disabled=false;label.querySelector('.big').textContent='📄 '+input.files[0].name;}
+  });}
+  pickFile(fileInput,convertBtn,drop);pickFile(zipInput,batchBtn,dropZip);
+  [drop,dropZip].forEach(function(d){['dragover','dragenter'].forEach(function(e){d.addEventListener(e,function(ev){ev.preventDefault();d.classList.add('over');});});
+    ['dragleave','drop'].forEach(function(e){d.addEventListener(e,function(ev){ev.preventDefault();d.classList.remove('over');});});});
+
+  function showPaywall(reason){
+    document.getElementById('paywallReason').textContent=reason;
+    var note=document.getElementById('paywallNote');
+    if(!PAYMENTS_READY){note.textContent='Online payment is being set up and goes live with the public launch — the free tier works right now.';}
+    document.getElementById('paywallModal').classList.add('show');
+  }
+  document.getElementById('paywallClose').onclick=function(){document.getElementById('paywallModal').classList.remove('show');};
+  document.getElementById('paywallModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+
+  function badgeHtml(status,badge){
+    if(!badge)return '<span class="qbadge q-locked">🔒 Locked</span>';
+    var cls=status==='passed'?'q-ok':(status==='suspicious'?'q-review':'q-failed');
+    var icon=status==='passed'?'✅':(status==='suspicious'?'⚠️':'❌');
+    return '<span class="qbadge '+cls+'">'+icon+' '+badge.label+'</span><div class="qnote">'+badge.note+'</div>';
+  }
+
+  convertBtn.onclick=function(){
+    var fd=new FormData();fd.append('file',fileInput.files[0]);fd.append('format',fmtSelect.value);
+    convertBtn.disabled=true;progress.style.display='block';result.style.display='none';
+    fetch('/api/convert',{method:'POST',body:fd}).then(function(r){
+      var q=r.headers.get('X-Quality'),ql=r.headers.get('X-Quality-Label'),qn=r.headers.get('X-Quality-Note');
+      if(r.status===402){return r.json().then(function(j){showPaywall(j.reason||'Free limit reached.');throw 'paywall';});}
+      if(!r.ok){return r.json().then(function(j){throw (j.error||'Conversion failed');});}
+      return r.blob().then(function(b){return {blob:b,filename:(r.headers.get('Content-Disposition')||'').match(/filename="?([^"]+)"?/),
+        q:q,ql:ql,qn:qn};});
+    }).then(function(d){
+      var url=URL.createObjectURL(d.blob),fn=(d.filename&&d.filename[1])||'converted.pdf';
+      result.innerHTML=badgeHtml(d.q,{label:d.ql,note:d.qn})+
+        '<a href="'+url+'" download="'+fn+'"><button class="primary">⬇ Download '+fn+'</button></a>'+
+        '<div class="qnote">Your original file was deleted from our server.</div>';
+      result.style.display='block';
+    }).catch(function(e){if(e!=='paywall'){result.innerHTML='<span class="qbadge q-failed">❌ '+String(e)+'</span>';result.style.display='block';}
+    }).finally(function(){progress.style.display='none';convertBtn.disabled=false;});
+  };
+
+  batchBtn.onclick=function(){
+    var fd=new FormData();fd.append('file',zipInput.files[0]);
+    var unlock=document.getElementById('unlockKey');
+    if(unlock&&unlock.value)fd.append('unlock',unlock.value);
+    batchBtn.disabled=true;batchProgress.style.display='block';batchResult.style.display='none';
+    fetch('/api/batch',{method:'POST',body:fd}).then(function(r){
+      if(r.status===402){return r.json().then(function(j){showPaywall(j.reason||'Free limit reached.');throw 'paywall';});}
+      return r.json().then(function(j){if(!r.ok||!j.ok)throw (j.error||'Batch failed');return j;});
+    }).then(function(j){
+      window.location='/batch/'+j.job_id;
+    }).catch(function(e){if(e!=='paywall'){batchResult.innerHTML='<span class="qbadge q-failed">❌ '+String(e)+'</span>';batchResult.style.display='block';}
+    }).finally(function(){batchProgress.style.display='none';batchBtn.disabled=false;});
+  };
+})();
+</script>
+</body>
+</html>
