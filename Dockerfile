@@ -20,8 +20,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py config.py converter.py verifier.py ./
+COPY app.py config.py converter.py verifier.py guides.py ./
 COPY templates/ templates/
+COPY guides/ guides/
 
 ENV PORT=7860
 EXPOSE 7860
