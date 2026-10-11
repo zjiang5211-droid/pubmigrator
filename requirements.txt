@@ -1,3 +1,4 @@
 flask>=3.0
 gunicorn>=21.0
+markdown>=3.0
 olefile>=0.47  # source-side .pub analysis (embedded picture count)

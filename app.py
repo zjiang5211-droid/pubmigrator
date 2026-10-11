@@ -577,5 +577,32 @@ def healthz():
     return jsonify({"ok": True})
 
 
+@app.route("/guides")
+def guides_index():
+    import guides as _g
+    return render_template(
+        "guides.html",
+        guides=_g.list_guides(),
+        site_url=config.SITE_URL,
+    )
+
+
+@app.route("/guides/<slug>")
+def guide_page(slug):
+    import guides as _g
+    result = _g.render_guide(slug)
+    if not result:
+        return "Guide not found", 404
+    title, description, html = result
+    return render_template(
+        "guide.html",
+        title=title,
+        description=description,
+        content=html,
+        site_url=config.SITE_URL,
+        slug=slug,
+    )
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "8000")))
