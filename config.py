@@ -28,6 +28,6 @@ MAX_ZIP_MB = int(os.environ.get("MAX_ZIP_MB", "500"))
 
 # --- Misc ---
 SITE_NAME = "PubMigrator"
-SITE_URL = os.environ.get("SITE_URL", "http://localhost:8000")  # set to real domain at deploy
+SITE_URL = os.environ.get("SITE_URL", "https://pubmigrator.onrender.com")  # set to real domain at deploy
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "hello@example.com")
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-change-me")
