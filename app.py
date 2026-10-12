@@ -58,6 +58,34 @@ JOB_TTL = 24 * 3600
 _hits = defaultdict(list)
 
 
+# --- Usage counter (kill-line tracking). Counts completed conversions only.
+# --- No personal data. Best-effort file backup; weekly cron reads /api/stats.
+_stats = {"conversions": 0, "started": time.time()}
+_STATS_FILE = os.path.join(tempfile.gettempdir(), "pubmigrator_stats.json")
+
+def _load_stats():
+    try:
+        with open(_STATS_FILE) as fh:
+            d = json.load(fh)
+            _stats["conversions"] = int(d.get("conversions", 0))
+            _stats["started"] = float(d.get("started", time.time()))
+    except Exception:
+        pass
+
+def _save_stats():
+    try:
+        with open(_STATS_FILE, "w") as fh:
+            json.dump(_stats, fh)
+    except Exception:
+        pass
+
+def _count_conversion(n=1):
+    _stats["conversions"] += n
+    _save_stats()
+
+_load_stats()
+
+
 def _client_ip():
     fwd = request.headers.get("X-Forwarded-For", "")
     return (fwd.split(",")[0].strip() or request.remote_addr or "unknown")
@@ -249,6 +277,7 @@ def _run_batch(job_id, members_data, paid):
 
     for i, (base, data) in enumerate(members_data):
         entry = _process_file(job_id, i, base, data, out_dir, thumb_dir, paid)
+        _count_conversion()
         report = _read_report(job_id) or report
         # replace-or-append (retry may re-run individual entries later)
         files = report.get("files", [])
@@ -277,6 +306,16 @@ def _run_batch(job_id, members_data, paid):
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
+
+@app.route("/api/stats")
+def api_stats():
+    """Usage counter for kill-line tracking. Counts only, no personal data."""
+    return jsonify({
+        "ok": True,
+        "conversions": _stats["conversions"],
+        "started": _stats["started"],
+    })
+
 
 @app.route("/")
 def index():
@@ -332,6 +371,8 @@ def api_convert():
         verdict, badge = v["verdict"], VERDICT_COPY[v["verdict"]]
     else:
         verdict, badge = ("passed", VERDICT_COPY["passed"]) if os.path.getsize(out_path) > 0 else ("failed", VERDICT_COPY["failed"])
+
+    _count_conversion()
 
     with open(out_path, "rb") as fh:
         data = fh.read()
