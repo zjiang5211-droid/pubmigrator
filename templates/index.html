@@ -7,7 +7,7 @@
 <meta name="description" content="Microsoft Publisher is gone. Batch-convert .pub files to PDF free — and get a per-file verification report showing which files converted cleanly and which need a look. No signup.">
 <link rel="canonical" href="{{ site_url }}/">
 <meta property="og:title" content="Batch PUB to PDF Converter with Verification — Free, No Signup">
-<meta property="og:description" content="Publisher is retired. Batch-convert .pub files to PDF and get a per-file verification report — the only converter that tells you which files it broke.">
+<meta property="og:description" content="Publisher is retired. Batch-convert .pub files to PDF and get a per-file verification report — every file checked for 0-byte output, lost text, and missing images.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ site_url }}/">
 <style>
@@ -106,6 +106,7 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:22px 0 40px;font
 <div class="hero">
   <h1>Batch Convert .pub to PDF — and See Which Files Actually Worked</h1>
   <p class="lede">Publisher is gone from Microsoft 365. Upload your .pub files and get PDFs back — with a <strong>per-file verification report</strong> that tells you which conversions to trust. Free, no signup, works on your phone.</p>
+  <p class="lede-sub">We built the verification because we got burned by its absence: our own test file — a real newsletter with 9 embedded images — came back from conversion with just 1. Our checker flagged it. An earlier version of our own quality badge had called it fine. That's the difference between a converter that checks its work and one that trusts its own output.</p>
 </div>
 
 <div class="tool-card" id="tool">
@@ -167,9 +168,16 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:22px 0 40px;font
   ⚠️ <strong>Needs a human look</strong> — converted, but something looks off (thin text, possibly lost pictures). Open it next to the original.<br>
   ❌ <strong>Conversion failed</strong> — no usable output. The file may be corrupted or use features the converter can't read.</div>
 
-  <h2>The only converter that tells you which files it broke</h2>
-  <p>Converting one file is easy. Converting <strong>two thousand</strong> — a teacher's decade of newsletters, a church's bulletin archive — and <em>knowing which ones actually survived</em> is the hard part. Other batch converters report "success" on files that came out as 0-byte PDFs or silently dropped every picture.</p>
-  <p>Our batch pipeline verifies every single file after conversion: is the PDF real and parseable, did the text survive, did the embedded pictures make it across? You get a <strong>per-file verification report</strong> — which files passed, which need a human look and why, which failed outright. Suspicious files get a first-page preview so you can eyeball them in seconds, and the failure list exports to CSV for your migration checklist. <a href="#batch">Try it on 5 files free</a>.</p>
+  <h2>We show our work. Here's the receipt.</h2>
+  <p>Converting one file is easy. Converting <strong>two thousand</strong> — a teacher's decade of newsletters, a church's bulletin archive — and <em>knowing which ones actually survived</em> is the hard part. Some converters report "success" on files that came out as 0-byte PDFs or silently dropped every picture.</p>
+  <p>Anyone can say "we verify." Here's what our verification actually checks, on every single file:</p>
+  <ul class="checks">
+    <li><strong>Is the PDF real?</strong> A conversion can exit cleanly — exit code 0, no errors — and still hand you a 0-byte file. We check the output exists, is non-zero, and actually parses as a PDF.</li>
+    <li><strong>Did the text survive?</strong> Publisher stores text in free-floating boxes; converters silently drop boxes they don't understand. We extract the text layer and check it's sane.</li>
+    <li><strong>Did the pictures make it?</strong> We count the embedded images inside your .pub file and count the images in the resulting PDF. If 9 go in and 1 comes out, you hear about it — with the reason why.</li>
+  </ul>
+  <p>That last check caught a real file. SampleNewsletter.pub — a genuine newsletter, 9 embedded images — converted to a PDF containing exactly 1 image. Our verifier flagged it "needs a human look." The previous version of our own quality badge had marked the same file as fine, which is precisely why we stopped trusting the converter and started checking its output.</p>
+  <p>You get a <strong>per-file verification report</strong> — which files passed, which need a human look and why, which failed outright. Suspicious files get a first-page preview so you can eyeball them in seconds, and the failure list exports to CSV for your migration checklist. <a href="#batch">Try it on 5 files free</a>.</p>
 
   <h2>Frequently asked questions</h2>
   <div class="faq">
