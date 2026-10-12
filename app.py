@@ -604,5 +604,24 @@ def guide_page(slug):
     )
 
 
+@app.route("/robots.txt")
+def robots_txt():
+    site = config.SITE_URL.rstrip("/")
+    body = f"User-agent: *\nAllow: /\n\nSitemap: {site}/sitemap.xml\n"
+    return Response(body, mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    import guides as _g
+    site = config.SITE_URL.rstrip("/")
+    urls = ["/", "/guides"] + [f"/guides/{g['slug']}" for g in _g.list_guides()]
+    items = "\n".join(f"  <url><loc>{site}{u}</loc></url>" for u in urls)
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           f"{items}\n</urlset>")
+    return Response(xml, mimetype="application/xml")
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "8000")))
