@@ -30,11 +30,13 @@ Trade-offs: it's a 300+ MB install with a learning curve, batch conversion means
 
 ### Newer PUB-Specialist Tools
 
-Since Publisher's retirement, a few focused PUB converters have appeared (including ours). The specialist pitch: we do one thing — PUB files — instead of 400 things adequately. Worth trying; just evaluate them on the same criteria below rather than on novelty.
+Since Publisher's retirement, a few focused PUB converters have appeared (including ours). The specialist pitch: we do one thing — PUB files — instead of 400 things adequately. Worth trying; just evaluate them on the same criteria below rather than on novelty. A word of caution: "we verify our conversions" is easy to say. Ask what the verification actually checks — and whether they can show you a file it caught.
 
 ### Our Converter
 
-We built ours around a single observation: **every other free converter trusts its own output, and that's where documents get lost.** So ours doesn't. Every conversion gets checked — file validity, text extraction, image counts — and you get a per-file verdict: passed, needs a human look (with the reason), or failed. We're the only converter we know of that will tell you "this file didn't make it" instead of hoping you won't notice.
+We built ours around a single observation: **every other free converter trusts its own output, and that's where documents get lost.** So ours doesn't. Every conversion gets checked — file validity, text extraction, image counts — and you get a per-file verdict: passed, needs a human look (with the reason), or failed.
+
+Here's the receipt. Our test file SampleNewsletter.pub is a real newsletter with 9 embedded images. It converted to a PDF with 1 image — and our checker flagged it "needs a human look," naming the image loss as the reason. The previous version of our own quality badge had marked that same file as fine. We didn't cherry-pick a competitor's failure; we caught our own pipeline's blind spot, and that's why the checker exists.
 
 Our free tier: single-file conversion with basic verification, no account required. Honest limitations: we're new (a smaller track record than the giants), we're PUB-focused (don't come to us for HEIC to PNG), and heavy batch users will eventually hit the free tier's limits.
 
@@ -42,7 +44,7 @@ Our free tier: single-file conversion with basic verification, no account requir
 
 - **1–5 files, just need to read them?** → Any of the above. Pick whichever interface you like.
 - **Sensitive documents that shouldn't be uploaded?** → LibreOffice on your own machine.
-- **Dozens of files and you need to trust the results?** → A converter with per-file verification (that's us — it's literally why we built it).
+- **Dozens of files and you need to trust the results?** → A converter with per-file verification. Ours checks every file against three things: is the PDF real and parseable (not a 0-byte file from a clean exit), did the text survive, did the images make it across.
 - **Hundreds+ files (archive migration)?** → Batch + verification is non-negotiable. Unverified batch conversion at that scale is how archives silently lose documents.
 - **You also need DOCX (editable) output?** → Check format support first; not every free converter does DOCX.
 
@@ -51,6 +53,17 @@ Our free tier: single-file conversion with basic verification, no account requir
 *"How do I know the conversion actually worked?"*
 
 With most converters, the answer is "open every file and look." With ours, the answer is "read the report." That difference is small for five files and enormous for five hundred. It's also the entire reason we exist — not to be another free converter, but to be the one that checks its work.
+
+## The Silent Failures We Check For
+
+A "successful" conversion can be broken in ways you'd never notice without checking. These are the specific failure modes our verification targets — all documented behaviors of PUB conversion, where the tool exits with code 0 and reports no error:
+
+- **The 0-byte PDF.** The tool exits cleanly and hands you a PDF file that is completely empty — zero kilobytes of actual content. The most common silent failure with PUB files.
+- **The vanishing text.** The PDF looks fine at a glance, but entire text boxes are missing. Publisher stores text in floating boxes positioned freely on the page; some converters simply drop boxes they don't understand, with no warning.
+- **The disappearing images.** Your newsletter had nine photos; the PDF has one. The rest vanished during conversion without a word. (This is the SampleNewsletter.pub case above — caught, flagged, explained.)
+- **The scrambled layout.** Text overlaps images, pages run into each other, fonts substitute into unreadability. Technically "converted." Practically useless.
+
+If 3% of files fail silently and you convert 1,000 files, that's 30 broken documents you'll never know about — until someone needs one.
 
 ## FAQ
 
