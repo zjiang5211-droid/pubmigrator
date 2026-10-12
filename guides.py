@@ -39,6 +39,10 @@ GUIDE_META = {
         "PUB to PDF Converter with Verification",
         "Most converters won't tell you when they break a file. Ours does — per-file verification report included.",
     ),
+    "publisher-2021-support-ends-october-13-2026": (
+        "Publisher 2021 Support Ends October 13, 2026: What Actually Happens",
+        "Support for Publisher 2021 ends October 13, 2026 — here's what actually changes, what keeps working, and how to migrate your archive this week.",
+    ),
 }
 
 _markdown = None
