@@ -611,6 +611,11 @@ def robots_txt():
     return Response(body, mimetype="text/plain")
 
 
+@app.route("/e60b429b454a72e3e1bff00ef285c58d09672253e6685ee8296a508647d4a12a.txt")
+def indexnow_key():
+    return Response("e60b429b454a72e3e1bff00ef285c58d09672253e6685ee8296a508647d4a12a", mimetype="text/plain")
+
+
 @app.route("/sitemap.xml")
 def sitemap_xml():
     import guides as _g
