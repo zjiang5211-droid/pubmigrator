@@ -43,6 +43,10 @@ GUIDE_META = {
         "Publisher 2021 Support Ends October 13, 2026: What Actually Happens",
         "Support for Publisher 2021 ends October 13, 2026 — here's what actually changes, what keeps working, and how to migrate your archive this week.",
     ),
+    "silent-pub-conversion-failures": (
+        "Your PUB Converter Said \"Success.\" Two Files Were Empty.",
+        "A competitor's own 25-file test caught the scariest conversion failure: tools reporting success with no PDF produced. Here's how to verify your batch.",
+    ),
 }
 
 _markdown = None
