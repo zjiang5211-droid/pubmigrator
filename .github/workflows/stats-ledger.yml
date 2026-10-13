@@ -1,0 +1,84 @@
+# Stats durability ledger for the kill-line scoreboard.
+#
+# WHY THIS EXISTS (2026-10-13):
+# The live /api/stats counter keeps its count in a JSON file under
+# tempfile.gettempdir() on Render's free tier (hf-space/app.py: _STATS_FILE).
+# Render's filesystem is ephemeral: on 2026-10-13 the counter had reset to
+# {"conversions": 0, "started": <today 13:39 local>} even though a 0->1
+# conversion was verified the night before. Every restart silently discards
+# conversions counted since the previous read, which corrupts the kill-line
+# weekly numbers (the weekly cron can detect a reset but cannot recover the
+# lost counts).
+#
+# WHAT THIS DOES:
+# Every 10 minutes it fetches https://pubmigrator.onrender.com/api/stats and
+# appends {"t","conversions","started"} to stats/ledger.jsonl, committing only
+# when conversions or started changed (quiet site = no commit noise).
+# Worst-case loss is now ~10 minutes of conversions instead of up to a week.
+#
+# DEPLOY: push this file to .github/workflows/stats-ledger.yml in
+# zjiang5211-droid/pubmigrator (public repo: Actions minutes are unlimited).
+# Then update the publisher-kill-line-weekly cron to compute weekly numbers
+# from stats/ledger.jsonl (raw.githubusercontent.com URL) instead of
+# /api/stats: group entries by `started` epoch; weekly new =
+# sum over epochs of (last conversions - first conversions) within the week.
+
+name: stats-ledger
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Snapshot /api/stats
+        run: |
+          python3 - <<'EOF'
+          import json, os, urllib.request, datetime
+          ledger = "stats/ledger.jsonl"
+          os.makedirs("stats", exist_ok=True)
+          try:
+              req = urllib.request.Request(
+                  "https://pubmigrator.onrender.com/api/stats",
+                  headers={"User-Agent": "pubmigrator-stats-ledger/1.0"},
+              )
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  d = json.loads(r.read())
+              conv, started = int(d["conversions"]), float(d["started"])
+          except Exception as e:
+              print("fetch failed, skipping:", e)
+              raise SystemExit(0)
+          last = None
+          if os.path.exists(ledger):
+              with open(ledger) as f:
+                  lines = [ln for ln in f if ln.strip()]
+              if lines:
+                  last = json.loads(lines[-1])
+          if last and last.get("conversions") == conv and last.get("started") == started:
+              print("no change since last snapshot, skipping")
+              raise SystemExit(0)
+          entry = {
+              "t": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              "conversions": conv,
+              "started": started,
+          }
+          with open(ledger, "a") as f:
+              f.write(json.dumps(entry) + "\n")
+          print("appended:", entry)
+          EOF
+
+      - name: Commit if changed
+        run: |
+          git config user.name "stats-bot"
+          git config user.email "stats-bot@users.noreply.github.com"
+          git add stats/ledger.jsonl
+          git diff --staged --quiet && echo "nothing to commit" && exit 0
+          git commit -m "stats snapshot $(date -u +%FT%TZ)"
+          git push
